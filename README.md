@@ -1,49 +1,91 @@
 # Perfect Saturday Planner
 
-A small Streamlit agent app that builds a personalized Saturday plan from user preferences.
+Perfect Saturday Planner is a small AI-powered Streamlit web app.
+It takes your city, budget, time, mood, interests, and constraints, then builds a practical Saturday plan.
 
-## Features
+## What This App Does
 
-- Structured input form: city, budget, available time, mood, interests, constraints
-- Tool-based agent flow (not one giant prompt):
-  - `parse_user_preferences`
-  - `get_activity_options`
-  - `get_food_options`
-  - `validate_plan`
-  - `generate_final_plan`
-- Agent trace UI under **Agent Thinking**
-- Failure handling:
-  - Missing required input warning
-  - Fallback activity/food when no options match
-- Works with or without model API keys:
-  - With `OPENAI_API_KEY`: uses `gpt-4o-mini`
-  - With `GROQ_API_KEY`: uses `llama-3.1-8b-instant` via Groq OpenAI-compatible endpoint
-  - Without key: local heuristic plan generator (still practical and personalized)
+- Collects user preferences from a clean form
+- Finds place options (real places from Overpass when available)
+- Filters options based on budget and constraints
+- Generates a final timeline with reasons
+- Shows a simple "Agent Thinking" trace so you can see each step
 
-## Local Run
+## Main Features
+
+### 1) Input Form
+You can enter:
+- City
+- Budget
+- Start time and end time
+- Mood
+- Interests (comma-separated)
+- Constraints (comma-separated)
+
+### 2) Tool-Based Agent Flow
+This app does not use one giant prompt.
+It uses separate functions (tools):
+
+- `parse_user_preferences(input_data)`
+- `get_real_places(city, interests, constraints)`
+- `get_activity_options(city, interests, mood)`
+- `get_food_options(city, budget, constraints)`
+- `validate_plan(plan, constraints, budget)`
+- `generate_final_plan(context)`
+- `run_agent(input_data)` to orchestrate all steps
+
+### 3) Real Data + Safe Fallback
+- Tries to fetch real places with Overpass API
+- If Overpass is slow/fails/returns nothing, it uses mock fallback data
+- This keeps the app working reliably
+
+### 4) Final Output
+The app shows:
+- Final Plan (timeline + explanation)
+- Why this plan fits you
+- Agent Thinking trace
+
+### 5) Failure Handling
+- Shows warning if required fields are missing
+- Uses fallback suggestion if valid options become empty
+- Works even without API keys (local fallback plan generation)
+
+### 6) Better UX
+- Loading spinner while planning
+- Progress updates during agent steps
+- Cleaner and colorful UI styling
+
+## API / Model Behavior
+
+- If `GROQ_API_KEY` is set: uses Groq (`llama-3.1-8b-instant`)
+- Else if `OPENAI_API_KEY` is set: uses OpenAI (`gpt-4o-mini`)
+- Else: uses local fallback text generation so the app still works
+
+## Project Structure
+
+Single-file app:
+- `app.py`
+
+Dependencies:
+- `requirements.txt`
+
+## Run Locally
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Streamlit Cloud Deploy
+## Deploy on Streamlit Cloud
 
-1. Push this repo to GitHub.
-2. Go to Streamlit Cloud and create a new app from the repo.
-3. Set main file to `app.py`.
-4. (Optional) Add one of these secrets:
+1. Push this project to GitHub
+2. Open Streamlit Cloud and create a new app
+3. Select your repo and set main file to `app.py`
+4. (Optional) Add secrets:
 
 ```toml
-OPENAI_API_KEY="your_key_here"
 GROQ_API_KEY="your_key_here"
+OPENAI_API_KEY="your_key_here"
 ```
 
-5. Deploy and share the generated public URL.
-
-## Notes on AI Tooling
-
-Built quickly with AI coding assistance for:
-- initial app scaffolding and Streamlit form flow
-- tool-function decomposition and trace structure
-- fallback logic and deployment-readiness checks
+5. Deploy and copy your public app URL
